@@ -1,5 +1,9 @@
 # genshin-dialogue-autoskip
 
+This fork of "genshin-dialogue-autoskip" includes my KBM only version which supports all resolutions. See the issue i've left on the original repo for more info.
+
+Below is the projects original readme:
+
 ## Overview
 This script automatically skips dialogue in Genshin Impact, always chooses the bottom dialogue option.
 
