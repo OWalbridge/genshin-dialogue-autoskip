@@ -1,28 +1,32 @@
-from random import randint, uniform
-from threading import Thread
+# Imports ----------------------------------------------------------------------
 from typing import Tuple, Union
-from time import sleep, time
-from win32api import GetSystemMetrics
 from datetime import datetime
-
 import os
+import time
+
 import pyautogui
 from pynput.mouse import Controller
 from pynput.keyboard import Key, KeyCode, Listener
 
-menu = ('-------------\n'
-          'Press:\n'
-          'F8 to start\n'
-          'F9 to stop\n'
-          'F10 for help\n'
-          'F12 to quit\n'
-          '-------------\n')
+try: # If on Windows, use win32api to get screen dimensions
+    from win32api import GetSystemMetrics
+except ImportError: # If not on Windows, use dummy function to return 1920x1080
+    def GetSystemMetrics(metric):
+        if metric == 0:
+            return 1920
+        elif metric == 1:
+            return 1080
+
+from random import randint, uniform
+from threading import Thread
+
+# Setup ------------------------------------------------------------------------
+os.system('cls' if os.name == 'nt' else 'clear') # Clear terminal
 
 # Get screen dimensions
 SCREEN_WIDTH = GetSystemMetrics(0)
 SCREEN_HEIGHT = GetSystemMetrics(1)
 
-os.system('cls' if os.name == 'nt' else 'clear')
 #Incase the resolution is not correct
 print ('\nWelcome to Genshin Impact Dialogue Skipper')
 print('Detected Resolution: ' + str(SCREEN_WIDTH) + 'x' + str(SCREEN_HEIGHT))
@@ -34,6 +38,16 @@ if input == 'n' or input == 'N':
     print('Enter resolution height: ')
     SCREEN_HEIGHT = int(input())
     print('\nNew resolution set to ' + str(SCREEN_WIDTH) + 'x' + str(SCREEN_HEIGHT) + '\n')
+
+# 'Constants' ------------------------------------------------------------------
+
+menu = ('-------------\n'
+          'Press:\n'
+          'F8 to start\n'
+          'F9 to stop\n'
+          'F10 for help\n'
+          'F12 to quit\n'
+          '-------------\n')
 
 # Adjust variables to the width and height of the screen
 def width_adjust(x: int) -> int:
@@ -67,7 +81,7 @@ DIALOGUE_ICON_HIGHER_Y = height_adjust(790)
 LOADING_SCREEN_X: int = width_adjust(1200)
 LOADING_SCREEN_Y: int = height_adjust(700)
 
-
+# Functions --------------------------------------------------------------------
 def get_pixel(x: int, y: int) -> Tuple[int, int, int]:
     """
     Return the RGB value of a pixel.
@@ -98,6 +112,7 @@ def random_cursor_position() -> Tuple[int, int]:
     y = randint(BOTTOM_DIALOGUE_MIN_Y, BOTTOM_DIALOGUE_MAX_Y)
 
     return x, y
+
 
 
 def exit_program() -> None:
@@ -131,6 +146,7 @@ def exit_program() -> None:
         listener.join()
 
 
+# Main program -----------------------------------------------------------------
 def main() -> None:
     """
     Skip Genshin Impact dialogue when it's present based on the colors of 3 specific pixels.
