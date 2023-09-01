@@ -196,6 +196,17 @@ class SkipperGUI(customtkinter.CTk):
         sys.stderr.write = console
         sys.excepthook = console
     
+    # Functions ----------------------------------------------------------------
+    def current_date(self):
+        now = datetime.now()
+        current_date = str(now.strftime("%d-%m-%Y"))
+        return current_date
+
+    def current_time(self):
+        now = datetime.now()
+        current_time = str(now.strftime("%H-%M-%S"))
+        return current_time
+    
     # Event handlers -----------------------------------------------------------
 
     def select_frame_by_name(self, name):
@@ -272,7 +283,14 @@ class SkipperGUI(customtkinter.CTk):
     # Console Frame Event Handlers ---------------------
     def export_button_event(self):
         #print("Export button clicked")
-        pass
+        try:
+            file_name = self.current_time() + "_" + self.current_date() + ".log"
+            file = open("./console_logs/" + file_name, "w")
+            file.write(self.console_frame_txtbox.get("0.0", "end"))
+            file.close()
+            print("Console output exported")
+        except:
+            print("Error: Could not export console output")
 
     # Customisation Frame Event Handlers ---------------
     def change_appearance_mode_event(self, new_appearance_mode: str):
