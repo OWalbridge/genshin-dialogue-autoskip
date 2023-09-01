@@ -16,6 +16,7 @@
 # Imports ----------------------------------------------------------------------
 import tkinter as tk
 import sys
+import os
 from datetime import datetime
 from logic import GenshinImpactDialogueSkipper
 import customtkinter
@@ -289,9 +290,13 @@ class SkipperGUI(customtkinter.CTk):
             file.write(self.console_frame_txtbox.get("0.0", "end"))
             file.close()
             print("Console output exported")
+            try:
+                os.startfile(os.path.realpath("./console_logs"))
+            except:
+                print("Error: Could not open console_logs folder")
         except:
             print("Error: Could not export console output")
-
+        
     # Customisation Frame Event Handlers ---------------
     def change_appearance_mode_event(self, new_appearance_mode: str):
         print("Appearance changed to " + new_appearance_mode)
