@@ -16,17 +16,19 @@
 #
 # ! Add error handling to config init. Not a major issue unless config.txt
 # ! is corrupted, or the user modifies it. The program shouldn't modify it wrong.
+# Make the reset button restart the app automatically
 # Append time to start of console output
 # Add more console error catching (if needed)
 
 # Imports ----------------------------------------------------------------------
-import tkinter as tk
 import sys
 import os
+import re
+import time
 from datetime import datetime
+import tkinter as tk
 from logic import GenshinImpactDialogueSkipper
 import customtkinter
-import re
 
 try: # If on Windows, use win32api to get screen dimensions
     from win32api import GetSystemMetrics
@@ -116,30 +118,38 @@ class SkipperGUI(customtkinter.CTk):
             # if you'd like but looks weird with black text, we need to make a 
             # text_color_disabled option if we want this featue
         self.stop_button.grid(row=2, column=0, padx=20, pady=10)
+        # - Reset Button
+        self.reset_button = customtkinter.CTkButton(self.navigation_frame,
+            command=self.reset_button_event, text="Reset Settings", fg_color=butt_theme,
+            hover_color=butt_hover_theme, text_color=(text_theme))
+        self.reset_button.grid(row=4, column=0, padx=20, pady=(10,0))
+        self.reset_label = customtkinter.CTkLabel(self.navigation_frame,
+            text="(Updates on restart)", anchor="w")
+        self.reset_label.grid(row=5, column=0, padx=30, pady=(0, 10))
         # - configure Button
         self.configure_button = customtkinter.CTkButton(self.navigation_frame, 
             corner_radius=0, height=40, border_spacing=10, text="Configure",
             fg_color="transparent", text_color=("gray10", "gray90"), 
             hover_color=("gray70", "gray30"), command=self.configure_button_event)
-        self.configure_button.grid(row=4, column=0, sticky="ew")
+        self.configure_button.grid(row=6, column=0, sticky="ew")
         # - Readme Button
         self.readme_button = customtkinter.CTkButton(self.navigation_frame, 
             corner_radius=0, height=40, border_spacing=10, text="Read Me!",
             fg_color="transparent", text_color=("gray10", "gray90"), 
             hover_color=("gray70", "gray30"), command=self.readme_button_event)
-        self.readme_button.grid(row=7, column=0, sticky="ew")
+        self.readme_button.grid(row=9, column=0, sticky="ew")
         # - Console Button
         self.console_button = customtkinter.CTkButton(self.navigation_frame, 
             corner_radius=0, height=40, border_spacing=10, text="Console",
             fg_color="transparent", text_color=("gray10", "gray90"), 
             hover_color=("gray70", "gray30"), command=self.console_button_event)
-        self.console_button.grid(row=6, column=0, sticky="ew")
+        self.console_button.grid(row=8, column=0, sticky="ew")
         # - Customise Button
         self.customise_button = customtkinter.CTkButton(self.navigation_frame, 
             corner_radius=0, height=40, border_spacing=10, text="Customise",
             fg_color="transparent", text_color=("gray10", "gray90"), 
             hover_color=("gray70", "gray30"), command=self.customise_button_event)
-        self.customise_button.grid(row=5, column=0, sticky="ew")
+        self.customise_button.grid(row=7, column=0, sticky="ew")
 
         # Configure frame -----------------------------------------------------------
         self.configure_frame = customtkinter.CTkFrame(self, corner_radius=0, 
@@ -281,7 +291,7 @@ class SkipperGUI(customtkinter.CTk):
         customtkinter.set_window_scaling(new_scaling_float)
         
         self.readme_frame_txtbox.configure(state='normal') # enable editing
-        self.readme_frame_txtbox.insert("0.0", "WARNING: There is a possibility you get banned for using this program. Use at your own risk!\n\nHow to use:\nEnsure the \"current resolution\" and \"input method\" are correct and hit \"start\". Head back to Genshin and dialoge will be auto clicked.\n\nThis program detects pixel colors to determine when to skip dialogue. It can misfire; disable when not in dialogue.\n\nThis project is under the MIT License.\n\n Contributors:\n-Hubert Rozmarynowski\n(Git Management, Pixel Coordiantes, Dialogue Selection, Documentation)\n\n-Owen Walbridge\n(UI, All Res Support, Fixes, Documentation)\n\n-xdenotte\n(Xbox Support)\n\n-Vamqueror\n(Dialog Selection, Fixes)\n\n-vlsido\n(DS4 Support)\n\n-YotamZiv298\n(Documentation and Code Clarity)")
+        self.readme_frame_txtbox.insert("0.0", "WARNING: There is a possibility you get banned for using this program. Use at your own risk!\n\nHow to use:\nEnsure the \"current resolution\" and \"input method\" are correct and hit \"start\". Head back to Genshin and dialoge will be auto clicked.\n\nThis program detects pixel colors to determine when to skip dialogue. It can misfire; disable when not in dialogue.\n\nThis project is under the MIT License.\n\n Contributors:\n-Hubert Rozmarynowski\n(Git Management, Pixel Coordiantes, Dialogue Selection, Documentation)\n\n-Owen Walbridge\n(User Interface, All Res Support, Customisation Options, Fixes, Documentation)\n\n-xdenotte\n(Xbox Support)\n\n-Vamqueror\n(Dialog Selection, Fixes)\n\n-vlsido\n(DS4 Support)\n\n-YotamZiv298\n(Documentation and Code Clarity)")
         self.readme_frame_txtbox.configure(state='disabled') # disable editing
         
     
@@ -364,6 +374,14 @@ class SkipperGUI(customtkinter.CTk):
         #print("Stop button clicked")
         self.stop_button.configure(state="disabled", fg_color=('darkred'))
         self.start_button.configure(state="normal", fg_color=('green'))
+
+    def reset_button_event(self):
+        certain = tk.messagebox.askyesno("Reset Settings?", "Are you sure you want to reset settings?")  
+        if certain:
+            file = open("config.txt", "w")
+            file.write(str(GetSystemMetrics(0)) + "|" + str(GetSystemMetrics(1)) + "|Keyboard|System|#1f6aa5|#134870|White|100%")
+            file.close()
+            # TODO make this restart the app automatically
 
     def configure_button_event(self):
         #print("Configure button clicked")
