@@ -69,16 +69,16 @@ class SkipperGUI(customtkinter.CTk):
         self.start_button.grid(row=1, column=0, padx=20, pady=10)
         self.stop_button = customtkinter.CTkButton(self.navigation_frame, command=self.stop_button_event, text="Stop", fg_color=('red'), hover_color=('darkred'))
         self.stop_button.grid(row=2, column=0, padx=20, pady=10)
-        # - Home Button
-        self.home_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Home",
+        # - configure Button
+        self.configure_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Configure",
                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30")
-                                                   , command=self.home_button_event)
-        self.home_button.grid(row=4, column=0, sticky="ew")
+                                                   , command=self.configure_button_event)
+        self.configure_button.grid(row=4, column=0, sticky="ew")
         # - Readme Button
-        self.readme_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Readme",
+        self.readme_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Read Me!",
                                                     fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30")
                                                     , command=self.readme_button_event)
-        self.readme_button.grid(row=5, column=0, sticky="ew")
+        self.readme_button.grid(row=7, column=0, sticky="ew")
         # - Console Button
         self.console_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Console",
                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30")
@@ -88,33 +88,33 @@ class SkipperGUI(customtkinter.CTk):
         self.customise_button = customtkinter.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10, text="Customise",
                                                    fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30")
                                                    , command=self.customise_button_event)
-        self.customise_button.grid(row=7, column=0, sticky="ew")
+        self.customise_button.grid(row=5, column=0, sticky="ew")
 
-        # Home frame -----------------------------------------------------------
-        self.home_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.home_frame.grid_columnconfigure(0, weight=0)
+        # Configure frame -----------------------------------------------------------
+        self.configure_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.configure_frame.grid_columnconfigure(0, weight=0)
 
         # Resolution
-        self.home_resolution_label = customtkinter.CTkLabel(self.home_frame, text="Current Resolution:\n" + str(self.SCREEN_WIDTH) + 'x' + str(self.SCREEN_HEIGHT), anchor="w")
-        self.home_resolution_label.grid(row=1, column=0, padx=30, pady=(10, 10))
+        self.configure_resolution_label = customtkinter.CTkLabel(self.configure_frame, text="Current Resolution:\n" + str(self.SCREEN_WIDTH) + 'x' + str(self.SCREEN_HEIGHT), anchor="w")
+        self.configure_resolution_label.grid(row=1, column=0, padx=30, pady=(10, 10))
 
-        self.home_resolution_entry_width = customtkinter.CTkEntry(self.home_frame, placeholder_text="Enter custom width")
-        self.home_resolution_entry_width.grid(row=2, column=0, padx=30, pady=(10, 10))
-        self.home_resolution_entry_height = customtkinter.CTkEntry(self.home_frame, placeholder_text="Enter custom height")
-        self.home_resolution_entry_height.grid(row=3, column=0, padx=30, pady=(10, 10))
+        self.configure_resolution_entry_width = customtkinter.CTkEntry(self.configure_frame, placeholder_text="Enter custom width")
+        self.configure_resolution_entry_width.grid(row=2, column=0, padx=30, pady=(10, 10))
+        self.configure_resolution_entry_height = customtkinter.CTkEntry(self.configure_frame, placeholder_text="Enter custom height")
+        self.configure_resolution_entry_height.grid(row=3, column=0, padx=30, pady=(10, 10))
 
-        self.home_resolution_button = customtkinter.CTkButton(self.home_frame,command = self.update_resolution_button_event, text="Update Resolution")
-        self.home_resolution_button.grid(row=4, column=0, padx=20, pady=(10, 10)) 
+        self.configure_resolution_button = customtkinter.CTkButton(self.configure_frame,command = self.update_resolution_button_event, text="Update Resolution")
+        self.configure_resolution_button.grid(row=4, column=0, padx=20, pady=(10, 10)) 
 
-        # Home Input Method
-        self.home_input_method_label = customtkinter.CTkLabel(self.home_frame, text="Input Method:", anchor="w")
-        self.home_input_method_label.grid(row=5, column=0, padx=30, pady=(10, 0))
-        self.home_input_method_optionemenu = customtkinter.CTkOptionMenu(self.home_frame, values=["Keyboard", "Xbox Controller", "DS4 Controller"],
+        # Configure Input Method
+        self.configure_input_method_label = customtkinter.CTkLabel(self.configure_frame, text="Input Method:", anchor="w")
+        self.configure_input_method_label.grid(row=5, column=0, padx=30, pady=(10, 0))
+        self.configure_input_method_optionemenu = customtkinter.CTkOptionMenu(self.configure_frame, values=["Keyboard"],
                                                                             command=self.change_input_type_event)
-        self.home_input_method_optionemenu.grid(row=6, column=0, padx=30, pady=(10, 10))
+        self.configure_input_method_optionemenu.grid(row=6, column=0, padx=30, pady=(10, 10))
 
-        self.home_input_method_comingsoon_label = customtkinter.CTkLabel(self.home_frame, text="Controller support\n coming soon!", anchor="w")
-        self.home_input_method_comingsoon_label.grid(row=7, column=0, padx=30, pady=(10, 0))
+        self.configure_input_method_comingsoon_label = customtkinter.CTkLabel(self.configure_frame, text="Remember to enable\nautoskip!", anchor="w")
+        self.configure_input_method_comingsoon_label.grid(row=7, column=0, padx=30, pady=(10, 0))
 
         # Readme frame ---------------------------------------------------------
         self.readme_frame = customtkinter.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -166,8 +166,8 @@ class SkipperGUI(customtkinter.CTk):
         self.stop_button.configure(state="disabled", fg_color=('darkred'))
         self.appearance_mode_optionemenu.set("System")
         self.scaling_optionemenu.set("100%")
-        self.select_frame_by_name("home")
-        self.home_input_method_optionemenu.set("Keyboard")
+        self.select_frame_by_name("configure")
+        self.configure_input_method_optionemenu.set("Keyboard")
 
         # TODO: Add readme from a file as opposed to hard coded; this is temp
         self.readme_frame_txtbox.configure(state='normal') # enable editing
@@ -199,16 +199,16 @@ class SkipperGUI(customtkinter.CTk):
     # Event handlers -----------------------------------------------------------
 
     def select_frame_by_name(self, name):
-        self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
+        self.configure_button.configure(fg_color=("gray75", "gray25") if name == "configure" else "transparent")
         self.readme_button.configure(fg_color=("gray75", "gray25") if name == "readme" else "transparent")
         self.console_button.configure(fg_color=("gray75", "gray25") if name == "console" else "transparent")
         self.customise_button.configure(fg_color=("gray75", "gray25") if name == "customise" else "transparent")
 
         # Show the selected frame
-        if name == "home":
-            self.home_frame.grid(row=0, column=1, sticky="nsew")
+        if name == "configure":
+            self.configure_frame.grid(row=0, column=1, sticky="nsew")
         else:
-            self.home_frame.grid_forget()
+            self.configure_frame.grid_forget()
         if name == 'readme':
             self.readme_frame.grid(row=0, column=1, sticky="nsew")
         else:
@@ -224,53 +224,55 @@ class SkipperGUI(customtkinter.CTk):
 
     # Navigation Frame Event Handlers ------------------
     def start_button_event(self):
-        print("Start button clicked")
+        #print("Start button clicked")
         self.stop_button.configure(state="normal", fg_color=('red'))
         self.start_button.configure(state="disabled", fg_color=('darkgreen'))
         
     def stop_button_event(self):
-        print("Stop button clicked")
+        #print("Stop button clicked")
         self.stop_button.configure(state="disabled", fg_color=('darkred'))
         self.start_button.configure(state="normal", fg_color=('green'))
 
-    def home_button_event(self):
-        print("Home button clicked")
-        self.select_frame_by_name("home")
+    def configure_button_event(self):
+        #print("Configure button clicked")
+        self.select_frame_by_name("configure")
 
     def readme_button_event(self):
-        print("Readme button clicked")
+        #print("Readme button clicked")
         self.select_frame_by_name("readme")
     
     def console_button_event(self):
-        print("Console button clicked")
+        #print("Console button clicked")
         self.select_frame_by_name("console")
 
     def customise_button_event(self):
-        print("Customise button clicked")
+        #print("Customise button clicked")
         self.select_frame_by_name("customise")
 
-    # Home Frame Event Handlers -------------------------
+    # configure Frame Event Handlers -------------------------
     def update_resolution_button_event(self):
-        print("Update Resolution button clicked")
+       #print("Update Resolution button clicked")
 
-        width_entry = self.home_resolution_entry_width.get()
-        height_entry = self.home_resolution_entry_height.get()
+        width_entry = self.configure_resolution_entry_width.get()
+        height_entry = self.configure_resolution_entry_height.get()
         if width_entry and height_entry:  # Check if both entries are not empty
             try:
                 self.SCREEN_WIDTH = int(width_entry)
                 self.SCREEN_HEIGHT = int(height_entry)
+                print("Resolution updated to " + str(self.SCREEN_WIDTH) + 'x' + str(self.SCREEN_HEIGHT))
             except ValueError:
                 print("Invalid input. Please enter valid integers for width and height.")
         else:
             print("Please enter values for both width and height.")
-        self.home_resolution_label.configure(text="Current Resolution:\n" + str(self.SCREEN_WIDTH) + 'x' + str(self.SCREEN_HEIGHT))
+        self.configure_resolution_label.configure(text="Current Resolution:\n" + str(self.SCREEN_WIDTH) + 'x' + str(self.SCREEN_HEIGHT))
 
     def change_input_type_event(self, new_input_type: str):
         print("Input type changed to " + new_input_type)
 
     # Console Frame Event Handlers ---------------------
     def export_button_event(self):
-        print("Export button clicked")
+        #print("Export button clicked")
+        pass
 
     # Customisation Frame Event Handlers ---------------
     def change_appearance_mode_event(self, new_appearance_mode: str):
@@ -278,7 +280,8 @@ class SkipperGUI(customtkinter.CTk):
         customtkinter.set_appearance_mode(new_appearance_mode)
     
     def change_theme_event(self):
-        print("Theme updated")
+        #print("Theme button clicked")
+        pass
 
     def change_scaling_event(elf, new_scaling: str):
         print("Scaling changed to " + new_scaling)
