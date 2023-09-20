@@ -1,6 +1,6 @@
-from gui import SkipperGUI
+from gui import GUI
 
 if __name__ == "__main__":
     # Start the GUI
-    app = SkipperGUI()
+    app = GUI()
     app.mainloop()
