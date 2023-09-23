@@ -1,80 +1,35 @@
-#Author(s): Owen Walbridge
+#Author(s): Owen Walbridge, 2023 | 
 
 #TODOs (More info in comments at relevent parts of code):
 #
-# ! Add error handling to config init. Not a major issue unless config.txt
-# ! is corrupted, or the user modifies it. The program shouldn't modify it wrong.
-# Make the reset button restart the app automatically
-# Append time to start of console output
-# Add more console error catching (if needed)
+# Add more error handling
+# Append time to start of console output (facing issues, see below)
+# Add more console error catching (if possible)
 # Find a way to update the theme without a restart needed? (not sure if possible)
 
 # Imports ----------------------------------------------------------------------
-import sys
 import os
-import re
-import time
-from datetime import datetime
+import sys
+
 import tkinter as tk
-from logic import GenshinImpactDialogueSkipper
 import customtkinter
 
-try: # If on Windows, use win32api to get screen dimensions
-    from win32api import GetSystemMetrics
-except ImportError: # If not on Windows, use dummy function to return 1920x1080
-    def GetSystemMetrics(metric):
-        if metric == 0:
-            return 1920
-        elif metric == 1:
-            return 1080
-
-import threading
-
-# Global Variables -------------------------------------------------------------
-customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
-customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
-
-# These need to be global to load them into the UI and create init config file
-# as opposed to class attributes
-SCREEN_WIDTH = GetSystemMetrics(0)
-SCREEN_HEIGHT = GetSystemMetrics(1)
-
-# Config -----------------------------------------------------------------------
-
-# Todo: Fix this: 
-# ! This isn't working perfectly, we need to check what we're loading because 
-# ! if a user modifies a config file, or it's corrupted or the app updates it 
-# ! wrongly for some reason, the whole app doesnt run and the user needs to delete
-# ! the config.txt file. The App will create a new default one on launch.
-try: # Try load existing config file
-    file = open("config.txt", "r")
-    config = file.read().split("|")
-    butt_theme = config[4]
-    butt_hover_theme = config[5]
-    text_theme = config[6]
-    file.close()
-except: # If no config, create default one
-    file = open("config.txt", "w")
-    file.write(str(SCREEN_WIDTH) + "|" + str(SCREEN_HEIGHT) + "|Keyboard|System|#1f6aa5|#134870|White|100%")
-    file.close()
-    file = open("config.txt", "r")
-    config = file.read().split("|")
-    butt_theme = config[4]
-    butt_hover_theme = config[5]
-    text_theme = config[6]
-    file.close()
+from logic import logic
+import file_io
+import utils
 
 class GUI(customtkinter.CTk):
-    # GUI ----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, screen_dimensions, input_type, theme, scale, text_theme, butt_theme, butt_hover_theme):
         super().__init__()
+        self.event_handlers = EventHandlers(self, screen_dimensions)
+        self.screen_dimensions = screen_dimensions
 
-        self.event_handlers = EventHandlers(self)
+        # UI Settings ----------------------------------------------------------
 
-        global SCREEN_WIDTH
-        global SCREEN_HEIGHT
+        # Set appearance mode
+        customtkinter.set_appearance_mode(theme)
 
-        # Configure window
+        # Configure window -----------------------------------------------------
         self.title("Genshin Impact Dialogue Skip")
         self.deiconify()
         self.geometry(f"{380}x{430}")
@@ -98,25 +53,22 @@ class GUI(customtkinter.CTk):
         self.start_button = customtkinter.CTkButton(self.navigation_frame, 
             command=self.event_handlers.start_button_event, text="Start", fg_color=('green'),
             hover_color=('darkgreen')) 
-            # TODO text_color=(text_theme) <- Can add this ^
+            # TODO text_color=(text_theme) <- Can add this, if users req ^
             # if you'd like but looks weird with black text, we need to make a 
             # text_color_disabled option if we want this featue
         self.start_button.grid(row=1, column=0, padx=20, pady=10)
         self.stop_button = customtkinter.CTkButton(self.navigation_frame, 
             command=self.event_handlers.stop_button_event, text="Stop", fg_color=('red'), 
             hover_color=('darkred'), text_color=(text_theme))
-            # TODO text_color=(text_theme) <- Can add this ^
+            # TODO text_color=(text_theme) <- Can add this, if users req^
             # if you'd like but looks weird with black text, we need to make a 
             # text_color_disabled option if we want this featue
         self.stop_button.grid(row=2, column=0, padx=20, pady=10)
         # - Reset Button
         self.reset_button = customtkinter.CTkButton(self.navigation_frame,
-            command=self.event_handlers.reset_button_event, text="Reset Settings", fg_color=butt_theme,
+            command=self.event_handlers.reset_button_event, text="Reset ALL Settings", fg_color=butt_theme,
             hover_color=butt_hover_theme, text_color=(text_theme))
-        self.reset_button.grid(row=4, column=0, padx=20, pady=(10,0))
-        self.reset_label = customtkinter.CTkLabel(self.navigation_frame,
-            text="(Updates on restart)", anchor="w")
-        self.reset_label.grid(row=5, column=0, padx=30, pady=(0, 10))
+        self.reset_button.grid(row=3, column=0, padx=20, pady=(10,0))
         # - configure Button
         self.configure_button = customtkinter.CTkButton(self.navigation_frame, 
             corner_radius=0, height=40, border_spacing=10, text="Configure",
@@ -149,11 +101,11 @@ class GUI(customtkinter.CTk):
 
         # Resolution
         self.detected_resolution_label = customtkinter.CTkLabel(self.configure_frame, 
-            text="Detected Resolution:\n" + str(SCREEN_WIDTH) + 'x' + str(SCREEN_HEIGHT), anchor="w")
+            text="Detected Resolution:\n" + str(self.screen_dimensions.detect_width()) + 'x' + str(self.screen_dimensions.detect_height()), anchor="w")
         self.detected_resolution_label.grid(row=1, column=0, padx=30, pady=(15, 0))
 
         self.configure_resolution_label = customtkinter.CTkLabel(self.configure_frame, 
-            text="Current Resolution:\n" + str(SCREEN_WIDTH) + 'x' + str(SCREEN_HEIGHT), anchor="w")
+            text="Current Resolution:\n" + str(self.screen_dimensions.get_width()) + 'x' + str(self.screen_dimensions.get_height()), anchor="w")
         self.configure_resolution_label.grid(row=2, column=0, padx=30, pady=(15, 0))
 
         self.configure_resolution_entry_width = customtkinter.CTkEntry(self.configure_frame, 
@@ -179,8 +131,8 @@ class GUI(customtkinter.CTk):
 
         # Notice
         self.configure_input_method_label = customtkinter.CTkLabel(self.configure_frame, 
-            text="Ensure the\ncurrent resolution\nand input method\nare correct.\nRemember to enable\nautoskip!", anchor="w")
-        self.configure_input_method_label.grid(row=8, column=0, padx=30, pady=(0, 10))
+            text="Remember to enable\nautoskip in-game!", anchor="w")
+        self.configure_input_method_label.grid(row=8, column=0, padx=30, pady=(30, 10))
 
         # Readme frame ---------------------------------------------------------
         self.readme_frame = customtkinter.CTkFrame(self, corner_radius=0, 
@@ -252,39 +204,29 @@ class GUI(customtkinter.CTk):
             button_hover_color=butt_theme)
         self.scaling_optionemenu.grid(row=9, column=0, padx=30, pady=(10, 20))
 
-        # Set default values ---------------------------------------------------
+        # Set defaults ---------------------------------------------------------
         self.stop_button.configure(state="disabled", fg_color=('darkred'))
-        self.configure_input_method_optionemenu.set("Keyboard")
         self.event_handlers.select_frame_by_name("configure")
 
-        # Load custom config.txt
-        file = open("config.txt", "r")
-        config = file.read().split("|")
-        file.close()
-        # Set resolution
-        SCREEN_WIDTH = int(config[0])
-        SCREEN_HEIGHT = int(config[1])
-        self.configure_resolution_label.configure(text="Current Resolution:\n" + str(SCREEN_WIDTH) + 'x' + str(SCREEN_HEIGHT))
+        # Passed from initialisation
         # Set input method
-        self.configure_input_method_optionemenu.set(config[2])
-        # Set appearance mode
-        self.appearance_mode_optionemenu.set(config[3]) 
-        customtkinter.set_appearance_mode(config[3])
+        self.configure_input_method_optionemenu.set(input_type)
         # Set theme
-        if config[6] == "White":
-            self.custom_theme_text_optionmenu.set("White text") 
-        elif config[6] == "Black":
-            self.custom_theme_text_optionmenu.set("Black text")
+        self.appearance_mode_optionemenu.set(theme) 
         # Set scaling
-        self.scaling_optionemenu.set(config[7])
-        new_scaling_float = int(config[7].replace("%", "")) / 100
+        new_scaling_float = int(scale.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
         customtkinter.set_window_scaling(new_scaling_float)
-        
+        self.scaling_optionemenu.set(scale)
+        # Set text
+        if text_theme == "White":
+            self.custom_theme_text_optionmenu.set("White text") 
+        elif text_theme == "Black":
+            self.custom_theme_text_optionmenu.set("Black text")
+        # todo: readme from file
         self.readme_frame_txtbox.configure(state='normal') # enable editing
         self.readme_frame_txtbox.insert("0.0", "WARNING: There is a possibility you get banned for using this program. Use at your own risk!\n\nHow to use:\nEnsure the \"current resolution\" and \"input method\" are correct and hit \"start\". Head back to Genshin and dialoge will be auto clicked.\n\nThis program detects pixel colors to determine when to skip dialogue. It can misfire; disable when not in dialogue.\n\nThis project is under the MIT License.\n\n Contributors:\n-Hubert Rozmarynowski\n(Git Management, Pixel Coordiantes, Dialogue Selection, Documentation)\n\n-Owen Walbridge\n(User Interface, All Res Support, Customisation Options, Fixes, Documentation)\n\n-xdenotte\n(Xbox Support)\n\n-Vamqueror\n(Dialog Selection, Fixes)\n\n-vlsido\n(DS4 Support)\n\n-YotamZiv298\n(Documentation and Code Clarity)")
         self.readme_frame_txtbox.configure(state='disabled') # disable editing
-        
     
         # Console Setup --------------------------------------------------------
 
@@ -294,8 +236,8 @@ class GUI(customtkinter.CTk):
             # TODO: Append time to start of console output
             # ! Currently not working becuase it's also appending it to the end
             # ! I've tried substrings to no avail, need to look into it
-            #current_time = datetime.now().strftime("%H:%M:%S")
-            #output = str(current_time) + ": " + str(text)
+            #current_time = utils.current_time()
+            #text = str(current_time) + ": " + str(text)
 
             self.console_frame_txtbox.configure(state='normal') # enable editing
             self.console_frame_txtbox.insert("end", text)
@@ -308,32 +250,10 @@ class GUI(customtkinter.CTk):
         sys.excepthook = console
     
 class EventHandlers:
-    def __init__(self, gui_instance):
+    def __init__(self, gui_instance, screen_dimensions):
         self.gui_instance = gui_instance
+        self.screen_dimensions = screen_dimensions
 
-    # Helper methods -----------------------------------------------------------
-    def current_date(self):
-        now = datetime.now()
-        current_date = str(now.strftime("%d-%m-%Y"))
-        return current_date
-
-    def current_time(self):
-        now = datetime.now()
-        current_time = str(now.strftime("%H-%M-%S"))
-        return current_time
-    
-    def get_config(self):
-        file = open("config.txt", "r")
-        config = file.read().split("|")
-        file.close()
-        return config
-    
-    def is_valid_hex_code(self, hex_code):
-        # Regular expression pattern for a valid hex code
-        hex_pattern = re.compile(r'^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$')
-        return bool(hex_pattern.match(hex_code))
-
-    # Methods ------------------------------------------------------------------
     def select_frame_by_name(self, name):
         self.gui_instance.configure_button.configure(fg_color=("gray75", "gray25") if name == "configure" else "transparent")
         self.gui_instance.readme_button.configure(fg_color=("gray75", "gray25") if name == "readme" else "transparent")
@@ -360,82 +280,61 @@ class EventHandlers:
 
     # Navigation Frame Event Handlers ------------------
     def start_button_event(self):
-        #print("Start button clicked")
         self.gui_instance.stop_button.configure(state="normal", fg_color=('red'))
         self.gui_instance.start_button.configure(state="disabled", fg_color=('darkgreen'))
         
     def stop_button_event(self):
-        #print("Stop button clicked")
         self.gui_instance.stop_button.configure(state="disabled", fg_color=('darkred'))
         self.gui_instance.start_button.configure(state="normal", fg_color=('green'))
 
     def reset_button_event(self):
         certain = tk.messagebox.askyesno("Reset Settings?", "Are you sure you want to reset settings?")  
         if certain:
-            file = open("config.txt", "w")
-            file.write(str(GetSystemMetrics(0)) + "|" + str(GetSystemMetrics(1)) + "|Keyboard|System|#1f6aa5|#134870|White|100%")
-            file.close()
-            # TODO make this restart the app automatically
+            detected_height = self.screen_dimensions.detect_height()
+            detected_width = self.screen_dimensions.detect_width()
+            file_io.write_default_config(detected_width, detected_height)
+            file_io.write_default_custom()
+            utils.restart_program()
 
     def configure_button_event(self):
-        #print("Configure button clicked")
         self.select_frame_by_name("configure")
 
     def readme_button_event(self):
-        #print("Readme button clicked")
         self.select_frame_by_name("readme")
     
     def console_button_event(self):
-        #print("Console button clicked")
         self.select_frame_by_name("console")
 
     def customise_button_event(self):
-        #print("Customise button clicked")
         self.select_frame_by_name("customise")
 
     # configure Frame Event Handlers -------------------------
     def update_resolution_button_event(self):
-       #print("Update Resolution button clicked")
-        #todo
         width_entry = self.gui_instance.configure_resolution_entry_width.get()
         height_entry = self.gui_instance.configure_resolution_entry_height.get()
-        if width_entry and height_entry:  # Check if both entries are not empty
+        if width_entry and height_entry:  # Check both entries are not empty
             try:
-                global SCREEN_WIDTH
-                global SCREEN_HEIGHT
-                SCREEN_WIDTH = int(width_entry)
-                SCREEN_HEIGHT = int(height_entry)
-                #print("Resolution updated to " + str(SCREEN_WIDTH) + 'x' + str(SCREEN_HEIGHT))
-
+                # TODO Add error handling
+                self.screen_dimensions.set_width(int(width_entry))
+                self.screen_dimensions.set_height(int(height_entry))
+                width_entry = str(self.screen_dimensions.get_width())
+                height_entry = str(self.screen_dimensions.get_height())
                 # Update config.txt
-                config = self.get_config()
-                file = open("config.txt", "w")
-                file.write(str(SCREEN_WIDTH) + "|" + str(SCREEN_HEIGHT) + "|" + config[2] + "|" + config[3] + "|" + config[4] + "|" + config[5] + "|" + config[6] + "|" + config[7])
-                file.close()
+                file_io.write_update_resolution(width_entry, height_entry)
+                self.gui_instance.configure_resolution_label.configure(text="Current Resolution:\n" + width_entry + 'x' + height_entry)
             except ValueError:
                 print("Invalid input. Please enter valid integers for width and height.")
         else:
             print("Please enter values for both width and height.")
-        self.gui_instance.configure_resolution_label.configure(text="Current Resolution:\n" + str(SCREEN_WIDTH) + 'x' + str(SCREEN_HEIGHT))
 
     def change_input_type_event(self, new_input_type: str):
-        #print("Input type changed to " + new_input_type)
-
         # Update config.txt
-        config = self.get_config()
-        file = open("config.txt", "w")
-        file.write(config[0] + "|" + config[1] + "|" + new_input_type + "|" + config[3] + "|" + config[4] + "|" + config[5] + "|" + config[6] + "|" + config[7])
-        file.close()
-        # todo
-
+        file_io.write_update_input_type(new_input_type)
+    
     # Console Frame Event Handlers ---------------------
     def export_button_event(self):
-        #print("Export button clicked")
         try:
-            file_name = self.current_time() + "_" + self.current_date() + ".log"
-            file = open("./console_logs/" + file_name, "w")
-            file.write(self.gui_instance.console_frame_txtbox.get("0.0", "end"))
-            file.close()
+            file_io.export_console_output(self.gui_instance.console_frame_txtbox.get("0.0", "end"))
             print("Console output exported")
             try:
                 os.startfile(os.path.realpath("./console_logs"))
@@ -447,39 +346,22 @@ class EventHandlers:
     # Customisation Frame Event Handlers ---------------
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
-
         # Update config.txt
-        config = self.get_config()
-        file = open("config.txt", "w")
-        file.write(config[0] + "|" + config[1] + "|" + config[2] + "|" + new_appearance_mode + "|" + config[4] + "|" + config[5] + "|" + config[6] + "|" + config[7])
-        file.close()
-        #print("Appearance changed to " + new_appearance_mode)
-    
-    def change_theme_event(self):
-        #print("Theme button clicked")
+        file_io.write_update_theme(new_appearance_mode)
 
+    def change_theme_event(self):
         # Update fg theme
-        fg_theme = self.gui_instance.custom_theme_entry_fg_color.get()
-        if self.is_valid_hex_code(fg_theme):
-            butt_theme = self.gui_instance.custom_theme_entry_fg_color.get()
-            config = self.get_config()
-            file = open("config.txt", "w")
-            file.write(config[0] + "|" + config[1] + "|" + config[2] + "|" + config[3] + "|" + butt_theme + "|" + config[5] + "|" + config[6] + "|" + config[7])
-            file.close()
-            print("Theme changed to " + butt_theme)
+        butt_theme = self.gui_instance.custom_theme_entry_fg_color.get()
+        if utils.is_valid_hex_code(butt_theme):
+            file_io.write_update_button_theme(butt_theme)
         else:
             print("Invalid hex code for button color")
 
 
         # Update hover theme
-        hover_theme = self.gui_instance.custom_theme_entry_hover_color.get()
-        if self.is_valid_hex_code(hover_theme):
-            butt_hover_theme = self.gui_instance.custom_theme_entry_hover_color.get()
-            config = self.get_config()
-            file = open("config.txt", "w")
-            file.write(config[0] + "|" + config[1] + "|" + config[2] + "|" + config[3] + "|" + config[4] + "|" + butt_hover_theme + "|" + config[6] + "|" + config[7])
-            file.close()
-            print("Hover theme changed to "+ butt_hover_theme)
+        butt_hover_theme = self.gui_instance.custom_theme_entry_hover_color.get()
+        if utils.is_valid_hex_code(butt_hover_theme):
+            file_io.write_update_button_hover_theme(butt_hover_theme)
         else:
             print("Invalid hex code for button hover color")
         
@@ -489,23 +371,10 @@ class EventHandlers:
             text_theme = "White"
         elif text_theme == "Black text":
             text_theme = "Black"
-        config = self.get_config()
-        file = open("config.txt", "w")
-        file.write(config[0] + "|" + config[1] + "|" + config[2] + "|" + config[3] + "|" + config[4] + "|" + config[5] + "|" + text_theme + "|" + config[7])
-        file.close()
-        print("Text changed to " + text_theme)
+        file_io.write_update_text_theme(text_theme)
         
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
         customtkinter.set_window_scaling(new_scaling_float)
-        config = self.get_config()
-        file = open("config.txt", "w")
-        file.write(config[0] + "|" + config[1] + "|" + config[2] + "|" + config[3] + "|" + config[4] + "|" + config[5] + "|" + config[6] + "|" + new_scaling)
-        file.close()
-        #print("Scaling changed to " + new_scaling)
-    
-# For testing GUI only purposes (Commented out when not in use) ----------------
-#if __name__ == "__main__":
-#    app = SkipperGUI()
-#    app.mainloop()
+        file_io.write_update_scale(new_scaling)
