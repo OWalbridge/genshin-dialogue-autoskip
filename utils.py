@@ -11,14 +11,14 @@ def restart_program():
     python = sys.executable
     os.execl(python, python, *sys.argv)
 
-def current_date():
+def current_date(sep):
     now = datetime.now()
-    current_date = str(now.strftime("%d:%m:%Y"))
+    current_date = str(now.strftime("%d" + sep + "%m" + sep + "%Y"))
     return current_date
 
-def current_time():
+def current_time(sep):
     now = datetime.now()
-    current_time = str(now.strftime("%H:%M:%S"))
+    current_time = str(now.strftime("%H" + sep + "%M" + sep + "%S"))
     return current_time
 
 def is_valid_hex_code(hex_code):

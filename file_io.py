@@ -3,6 +3,7 @@
 # files.
 
 import os
+import utils
 
 def read(file):
     file = open(file, "r")
@@ -23,7 +24,7 @@ def write_default_custom():
     file.close()
 
 def export_console(console):
-    file_name = self.current_time() + "_" + self.current_date() + ".log"
+    file_name = utils.current_time("-") + "_" + utils.current_date("-") + ".log"
     file = open("./console_logs/" + file_name, "w")
     file.write(console)
     file.close()

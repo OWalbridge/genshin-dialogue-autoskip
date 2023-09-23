@@ -5,7 +5,7 @@
 # Add more error handling
 # Append time to start of console output (facing issues, see below)
 # Add more console error catching (if possible)
-# Find a way to update the theme without a restart needed? (not sure if possible)
+# Find a way to update the theme without a restart needed? (uncertain if possible)
 
 # Imports ----------------------------------------------------------------------
 import os
@@ -102,7 +102,7 @@ class GUI(customtkinter.CTk):
         # Resolution
         self.detected_resolution_label = customtkinter.CTkLabel(self.configure_frame, 
             text="Detected Resolution:\n" + str(self.screen_dimensions.detect_width()) + 'x' + str(self.screen_dimensions.detect_height()), anchor="w")
-        self.detected_resolution_label.grid(row=1, column=0, padx=30, pady=(15, 0))
+        self.detected_resolution_label.grid(row=1, column=0, padx=30, pady=(30, 0))
 
         self.configure_resolution_label = customtkinter.CTkLabel(self.configure_frame, 
             text="Current Resolution:\n" + str(self.screen_dimensions.get_width()) + 'x' + str(self.screen_dimensions.get_height()), anchor="w")
@@ -132,8 +132,7 @@ class GUI(customtkinter.CTk):
         # Notice
         self.configure_input_method_label = customtkinter.CTkLabel(self.configure_frame, 
             text="Remember to enable\nautoskip in-game!", anchor="w")
-        self.configure_input_method_label.grid(row=8, column=0, padx=30, pady=(30, 10))
-
+        self.configure_input_method_label.grid(row=8, column=0, padx=30, pady=(25, 10))
         # Readme frame ---------------------------------------------------------
         self.readme_frame = customtkinter.CTkFrame(self, corner_radius=0, 
             fg_color="transparent")
@@ -236,7 +235,7 @@ class GUI(customtkinter.CTk):
             # TODO: Append time to start of console output
             # ! Currently not working becuase it's also appending it to the end
             # ! I've tried substrings to no avail, need to look into it
-            #current_time = utils.current_time()
+            #current_time = utils.current_time(":")
             #text = str(current_time) + ": " + str(text)
 
             self.console_frame_txtbox.configure(state='normal') # enable editing
@@ -334,7 +333,7 @@ class EventHandlers:
     # Console Frame Event Handlers ---------------------
     def export_button_event(self):
         try:
-            file_io.export_console_output(self.gui_instance.console_frame_txtbox.get("0.0", "end"))
+            file_io.export_console(self.gui_instance.console_frame_txtbox.get("0.0", "end"))
             print("Console output exported")
             try:
                 os.startfile(os.path.realpath("./console_logs"))
