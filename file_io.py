@@ -41,7 +41,6 @@ def write_update_input(new_input_type):
     file.write(temp[0] + "|" + temp[1] + "|" + new_input_type)
     file.close()
 
-#todo 
 def write_update_theme(new_appearance_mode):
     temp = read("custom.txt")
     file = open("custom.txt", "w")
