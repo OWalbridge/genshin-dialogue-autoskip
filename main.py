@@ -37,7 +37,7 @@ def initialise():
 
     return screen_dimensions, input_type, theme, scale, text_theme, butt_theme, butt_hover_theme
 
-def run():
+def main():
     # Load settings
     screen_dimensions, input_type, theme, scale, text_theme, butt_theme, butt_hover_theme = initialise()
     # Start app loop
@@ -45,4 +45,4 @@ def run():
     app.mainloop()
 
 if __name__ == "__main__":
-    run()
+    main()
