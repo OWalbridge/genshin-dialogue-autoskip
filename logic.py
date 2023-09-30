@@ -1,39 +1,90 @@
 #Author(s): Owen Walbridge, 2023 | 
 
-import screen_dimensions
+from typing import Tuple, Union
+
+import os
+import time
+
+import pyautogui
+from pynput.mouse import Controller
+from pynput.keyboard import Key, KeyCode, Listener
+from threading import Thread
+from random import randint, uniform
+
+import utils
 
 class logic:
     def __init__(self, screen_dimensions):
         self.screen_dimensions = screen_dimensions
+        self.stop_flag = False
+        self.mouse = Controller()
 
-    # Adjust variables to the width and height of the screen
-    def width_adjust(self, x: int) -> int:
+    def start(self):
+        self.stop_flag = False
+        Thread(target=self.run).start()
+
+    def stop(self):
+        self.stop_flag = True
+
+    def get_pixel(self, x: int, y: int) -> Tuple[int, int, int]:
         """
-        Adjust variables to the width of the screen
+        Return the RGB value of a pixel.
+        :param x: The x coordinate of the pixel.
+        :param y: The y coordinate of the pixel.
+        :return: The RGB value of the pixel.
         """
-        return int(x/1920 * self.screen_dimensions.get_width())
 
-    def height_adjust(self, y: int) -> int:
+        return pyautogui.pixel(x, y)
+
+    def random_interval(self) -> float:
         """
-        Adjust variables to the height of the screen
+        Return a random interval between 0.12 and 0.18 seconds, or 0.18 and 0.2 seconds if a 6 is rolled.
+        :return: A random interval between 0.12 and 0.18 seconds, or 0.18 and 0.3 seconds if a 6 is rolled.
         """
-        return int(y/1080 * self.screen_dimensions.get_height())
 
-    # Dimensions of bottom dialogue option.
-    BOTTOM_DIALOGUE_MIN_X: int = width_adjust(1300)
-    BOTTOM_DIALOGUE_MAX_X: int = width_adjust(1700)
-    BOTTOM_DIALOGUE_MIN_Y: int = height_adjust(790)
-    BOTTOM_DIALOGUE_MAX_Y: int = height_adjust(800)
+        return uniform(0.18, 0.2) if randint(1, 6) == 6 else uniform(0.12, 0.18)
 
-    # Pixel coordinates for white part of the autoplay button.
-    PLAYING_ICON_X = width_adjust(84)
-    PLAYING_ICON_Y = height_adjust(46)
+    def random_cursor_position(self) -> Tuple[int, int]:
+        """
+        The cursor is moved to a random position in the bottom dialogue option.
+        :return: A random (x, y) in range of the bottom dialogue option.
+        """
+        x = randint(self.screen_dimensions.BOTTOM_DIALOGUE_MIN_X, self.screen_dimensions.BOTTOM_DIALOGUE_MAX_X)
+        y = randint(self.screen_dimensions.BOTTOM_DIALOGUE_MIN_Y, self.screen_dimensions.BOTTOM_DIALOGUE_MAX_Y)
+        print(x, y)
+        return x, y
 
-    # Pixel coordinates for white part of the speech bubble in bottom dialogue option.
-    DIALOGUE_ICON_X = width_adjust(1301)
-    DIALOGUE_ICON_LOWER_Y = height_adjust(808)
-    DIALOGUE_ICON_HIGHER_Y = height_adjust(790)
+    def run(self):
+        """
+        Skip Genshin Impact dialogue when it's present based on the colors of 3 specific pixels.
+        :return: None
+        """
 
-    # Pixel coordinates near middle of the screen known to be white while the game is loading.
-    LOADING_SCREEN_X: int = width_adjust(1200)
-    LOADING_SCREEN_Y: int = height_adjust(700)
+        def is_dialogue_option_available():
+            # Confirm loading screen is not white
+            if self.get_pixel(self.screen_dimensions.LOADING_SCREEN_X, self.screen_dimensions.LOADING_SCREEN_Y) == (255, 255, 255):
+                return False
+
+            # Check if lower dialogue icon pixel is white
+            if self.get_pixel(self.screen_dimensions.DIALOGUE_ICON_X, self.screen_dimensions.DIALOGUE_ICON_LOWER_Y) == (255, 255, 255):
+                return True
+
+            # Check if higher dialogue icon pixel is white
+            if self.get_pixel(self.screen_dimensions.DIALOGUE_ICON_X, self.screen_dimensions.DIALOGUE_ICON_HIGHER_Y) == (255, 255, 255):
+                return True
+
+            return False
+
+        last_reposition: float = 0.0
+        time_between_repositions: float = self.random_interval() * 40
+
+        while not self.stop_flag:
+            if is_dialogue_option_available():
+                if time.time() - last_reposition > time_between_repositions:
+                    current_time = utils.current_time(":")
+                    print(str(current_time) + ': Selecting dialogue')
+                    last_reposition = time.time()
+                    time_between_repositions = self.random_interval() * 40
+                    self.mouse.position = self.random_cursor_position()
+                    pyautogui.click()
+                    print("Clicked")

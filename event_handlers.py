@@ -6,11 +6,13 @@ import customtkinter
 
 import file_io
 import utils
+import logic
 
 class EventHandlers:
     def __init__(self, gui_instance, screen_dimensions):
         self.gui_instance = gui_instance
         self.screen_dimensions = screen_dimensions
+        self.logic = logic.logic(self.screen_dimensions)
 
     def select_frame_by_name(self, name):
         self.gui_instance.configure_button.configure(fg_color=("gray75", "gray25") if name == "configure" else "transparent")
@@ -42,10 +44,14 @@ class EventHandlers:
     def start_button_event(self):
         self.gui_instance.stop_button.configure(state="normal", fg_color=('red'))
         self.gui_instance.start_button.configure(state="disabled", fg_color=('darkgreen'))
+
+        self.logic.start()
         
     def stop_button_event(self):
         self.gui_instance.stop_button.configure(state="disabled", fg_color=('darkred'))
         self.gui_instance.start_button.configure(state="normal", fg_color=('green'))
+
+        self.logic.stop()
 
     # --------------------------------------------------------------------------
 
@@ -79,6 +85,7 @@ class EventHandlers:
                 # TODO Add error handling
                 self.screen_dimensions.set_width(int(width_entry))
                 self.screen_dimensions.set_height(int(height_entry))
+                self.screen_dimensions.update_pixels()
                 width_entry = str(self.screen_dimensions.get_width())
                 height_entry = str(self.screen_dimensions.get_height())
                 # Update config.txt
