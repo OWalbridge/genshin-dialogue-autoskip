@@ -11,6 +11,10 @@ except ImportError: # If not on Windows, use dummy function to return 1920x1080
 
 class ScreenDimensions:
     def __init__(self):
+        """
+        Initialise the screen dimensions.
+        return: None
+        """
         self.width = GetSystemMetrics(0)
         self.height = GetSystemMetrics(1)
 

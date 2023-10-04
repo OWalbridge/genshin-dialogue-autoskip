@@ -1,6 +1,5 @@
 #Author(s): Owen Walbridge, 2023 | 
 
-import ctypes
 import os
 import sys
 import os.path
@@ -8,23 +7,15 @@ import file_io
 from screen_dimensions import ScreenDimensions
 from gui import GUI
 
-# Check if the script is already running as administrator
-def is_admin():
-    try:
-        return ctypes.windll.shell32.IsUserAnAdmin()
-    except:
-        return False
-
-# If not running as administrator, request admin privileges and restart the script
-if not is_admin():
-    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
-    sys.exit()
-
 # Todo: Add error handling
 # We need to check what we're loading. If a user modifies an app file, 
 # it's corrupted or the app updates it wrongly, the whole app doesnt run and the 
 # user needs to delete the config.txt & customise.txt files.
 def initialise():
+    """
+    Initialise the app by loading settings from config.txt and customise.txt.
+    return: screen_dimensions, input_type, theme, scale, text_theme, butt_theme, butt_hover_theme
+    """
     screen_dimensions = ScreenDimensions()
     # Check if config.txt exists, if not, make it
     if (os.path.isfile("config.txt") == False):
@@ -53,9 +44,11 @@ def initialise():
     return screen_dimensions, input_type, theme, scale, text_theme, butt_theme, butt_hover_theme
 
 def main():
-    # Load settings
+    """
+    Main function. Initialises the app and starts the GUI.
+    return: None
+    """
     screen_dimensions, input_type, theme, scale, text_theme, butt_theme, butt_hover_theme = initialise()
-    # Start app loop
     app = GUI(screen_dimensions, input_type, theme, scale, text_theme, butt_theme, butt_hover_theme)
     app.mainloop()
 

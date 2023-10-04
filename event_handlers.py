@@ -15,6 +15,11 @@ class EventHandlers:
         self.logic = logic.logic(self.screen_dimensions)
 
     def select_frame_by_name(self, name):
+        """
+        Change GUI frame
+        :param name: Name of the frame to show
+        :return: None
+        """
         self.gui_instance.configure_button.configure(fg_color=("gray75", "gray25") if name == "configure" else "transparent")
         self.gui_instance.readme_button.configure(fg_color=("gray75", "gray25") if name == "readme" else "transparent")
         self.gui_instance.console_button.configure(fg_color=("gray75", "gray25") if name == "console" else "transparent")

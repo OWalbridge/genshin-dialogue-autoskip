@@ -17,6 +17,11 @@ import event_handlers
 
 class GUI(customtkinter.CTk):
     def __init__(self, screen_dimensions, input_type, theme, scale, text_theme, butt_theme, butt_hover_theme):
+        """
+        Initialise the GUI.
+        :return: None
+        """
+        
         super().__init__()
         self.event_handlers = event_handlers.EventHandlers(self, screen_dimensions)
         self.screen_dimensions = screen_dimensions
@@ -227,6 +232,12 @@ class GUI(customtkinter.CTk):
         # Console Setup --------------------------------------------------------
 
         def console(*args, **kwargs):
+            """
+            Redirect console to the in app console frame.
+            :param args: The arguments to print.
+            :param kwargs: The keyword arguments to print.
+            :return: None
+            """
             text = ' '.join(str(arg) for arg in args)
 
             # TODO: Append time to start of console output
